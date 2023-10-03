@@ -7,3 +7,5 @@
 6. БД:        - POSTGRES_USER=postgres
               - POSTGRES_PASSWORD=postgres
               - POSTGRES_DB=django_app_dev
+
+PS. Установлена задержка запуска Django, страница будет доступна примерно через 10 сек. после запуска контейнеров.
