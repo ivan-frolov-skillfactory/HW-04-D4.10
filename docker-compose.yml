@@ -1,0 +1,59 @@
+version: '3.8'
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+  
+services:
+
+  db:
+    image: postgres:15.3
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=django_app_dev
+  web:
+    # build: ./
+    image: ivanfr1025/final-work-1025-ivanfr:web-final
+    command: sh -c "sleep 20 && python manage.py migrate && python manage.py createcachetable && python manage.py createsuperuser --noinput && python manage.py collectstatic --noinput && gunicorn django_app.wsgi:application --bind 0.0.0.0:8000"
+    # command: sh -c "python manage.py migrate && python manage.py createsuperuser --noinput && gunicorn django_app.wsgi:application --bind 0.0.0.0:8000"
+    environment:
+      - DJANGO_SUPERUSER_USERNAME=admin
+      - DJANGO_SUPERUSER_PASSWORD=admin
+      - DJANGO_SUPERUSER_EMAIL=admin@example.com
+      - DEBUG=0
+      - SECRET_KEY=foo
+      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+      - SQL_ENGINE=django.db.backends.postgresql
+      - SQL_DATABASE=django_app_dev
+      - SQL_USER=postgres
+      - SQL_PASSWORD=postgres
+      - SQL_HOST=db
+      - SQL_PORT=5432
+      - DATABASE=postgres
+    volumes:
+      # - static_volume:/home/app/web/staticfiles
+      - ./:/usr/src/app/
+      - ./static/:/usr/src/app/static/
+      - ./media/:/usr/src/app/media/
+    # ports:
+    #   - 8000:8000
+    expose:
+      - 8000
+    depends_on:
+      - db
+ 
+  nginx:
+    # build: ./nginx
+    image: ivanfr1025/final-work-1025-ivanfr:nginx-final
+    volumes:
+      - ./static/:/usr/src/app/static/
+      - ./media/:/usr/src/app/media/
+    ports:
+      - 8008:80
+    depends_on:
+      - web
+ 
+
